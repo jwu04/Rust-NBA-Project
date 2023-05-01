@@ -1,1 +1,1 @@
-# Rust-NBA-Project
+# Rust NBA Project
