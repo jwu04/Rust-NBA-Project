@@ -33,7 +33,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut temp_tid = -1;
     for result in game_data?.records() {
 
-        // let record = result?;
+        let record = result?;
         // if record[0].parse::<i32>().unwrap() % 100000 == 0 {
         //     println!("{:?}", record[0].parse::<i32>().unwrap());
         // }
