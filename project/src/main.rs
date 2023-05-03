@@ -9,7 +9,7 @@ fn main() {
         players = parse_data::read_file::read_game_data(data);
     }
     if let Result::Ok(data) = players {
-        let graph = algo::search::bfs(data, 1234, 733);
+        let graph = algo::search::bfs(data, 1234, 3444);
         println!("{:?}", graph);
     }
     let duration = start.elapsed();

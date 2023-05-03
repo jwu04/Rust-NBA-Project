@@ -28,7 +28,6 @@ pub mod search {
                             }
                         }
                     }
-
                 }
             }
             for edge in &teammates {
@@ -47,6 +46,6 @@ pub mod search {
                 }
             }
         }
-        return format!("{}:{:?}:{:?}",start_v,distance[end_v as usize],component[end_v as usize]);
+        return format!("Starts with: {}",component[end_v as usize].as_ref().unwrap());
     }
 }

@@ -21,11 +21,13 @@ pub mod read_file {
     pub fn read_player_data() -> Result<HashMap<i32, Player>, Box<dyn Error>> {
         let mut players= HashMap::<i32,  Player>::new();
         let read_players = csv::Reader::from_path("../data/players.csv");
+
         for result in read_players?.records() {
             let record = result?;
             let person = Player{id: record[0].parse::<i32>().unwrap(), name: record[1].to_string(), team: Some(Vec::new())};
             players.insert(record[0].parse::<i32>().unwrap(), person);
         }
+
         return Ok(players)
     }
 
@@ -33,6 +35,7 @@ pub mod read_file {
         let game_data = csv::Reader::from_path("../data/game_player_data.csv");
         let mut team = Vec::<i32>::new();
         let mut temp_tid = -1;
+
         for result in game_data?.records() {
             let record = result?;
             if record[2].parse::<i32>().unwrap() != temp_tid {
