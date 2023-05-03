@@ -1,4 +1,5 @@
 use std::time::{Instant};
+use rand::Rng;
 mod parse_data;
 mod algo;
 
@@ -9,7 +10,7 @@ fn main() {
         players = parse_data::read_file::read_game_data(data);
     }
     if let Result::Ok(data) = players {
-        let graph = algo::search::bfs(data, 1234, 3444);
+        let graph = algo::search::bfs(data, 1234, 2946);
         println!("{:?}", graph);
     }
     let duration = start.elapsed();
