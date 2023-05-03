@@ -1,26 +1,23 @@
 pub mod read_file {
     use std::collections::HashMap;
     use std::collections::HashSet;
-    use std::hash::Hash;
     use std::{error::Error};
     use csv::{self};
     
-    #[allow(dead_code)]
     #[derive(Clone, Debug)]
     pub struct Player {
-        id: i32,
-        name: String,
-        team: Option<Vec<Team>>
+        pub id: i32,
+        pub name: String,
+        pub team: Option<Vec<Team>>
     }
 
     #[derive(Clone, Debug, PartialEq)]
     pub struct Team {
-        team_id: i32,
-        teammate_id: Option<HashSet<i32>>,
-        year: String
-    
+        pub team_id: i32,
+        pub teammate_id: Option<HashSet<i32>>,
+        pub year: String
     }
-    
+
     pub fn read_player_data() -> Result<HashMap<i32, Player>, Box<dyn Error>> {
         let mut players= HashMap::<i32,  Player>::new();
         let read_players = csv::Reader::from_path("../data/players.csv");
@@ -32,7 +29,7 @@ pub mod read_file {
         return Ok(players)
     }
 
-    pub fn read_game_data(mut players: HashMap<i32, Player>) -> Result<(HashMap<i32, Player>), Box<dyn Error>> {
+    pub fn read_game_data(mut players: HashMap<i32, Player>) -> Result<HashMap<i32, Player>, Box<dyn Error>> {
         let game_data = csv::Reader::from_path("../data/game_player_data.csv");
         let mut team = Vec::<i32>::new();
         let mut temp_tid = -1;
