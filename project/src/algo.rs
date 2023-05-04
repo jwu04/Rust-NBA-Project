@@ -20,6 +20,18 @@ pub mod search {
         return team_year
     }
 
+    pub fn find_id(players: &HashMap<i32, Player>, p1: String) -> i32 {
+        for p in 1..get_size(players) {
+            let player = players.get(&(p as i32)).unwrap();
+            let p_name = &player.name;
+            if p_name.to_lowercase().eq(&p1) {
+                return player.id
+            }
+        }
+        println!("====== Could not find a player with that name (either the player does not exist in the data or it is incorrectly spelled).");
+        return -1
+    }
+
     fn bfs_graph(c: Vec<Option<String>>, players: HashMap<i32, Player>, v_start: i32, v_end: i32) -> String {
         let start_name = players.get(&v_start).unwrap().name.to_string();
         let end_name = players.get(&v_end).unwrap().name.to_string();
@@ -33,20 +45,20 @@ pub mod search {
                         let player_one = players.get(&parsed[index].parse::<i32>().unwrap()).unwrap();
                         let player_two = players.get(&(parsed[index+1].parse::<i32>().unwrap())).unwrap();
                         let cxn = same_team_season(&players, player_one.id, player_two.id);
-                        graph.push_str(&format!("\n{} -- [{}] -- {}", player_one.name, cxn, player_two.name))
+                        graph.push_str(&format!("\n====== {} -- [{}] -- {}", player_one.name, cxn, player_two.name))
                     }
                 } 
                 else {
                     let player_one = players.get(&parsed[0].parse::<i32>().unwrap()).unwrap();
                     let player_two = players.get(&(parsed[0].parse::<i32>().unwrap())).unwrap();
                     let cxn = same_team_season(&players, player_one.id, player_two.id);
-                    graph.push_str(&format!("\n{} -- [{}] -- {}", player_one.name, cxn, player_two.name))
+                    graph.push_str(&format!("\n====== {} -- [{}] -- {}", player_one.name, cxn, player_two.name))
                 }
-                return format!("NBA 6 Degrees of Freedom Between: \n[{}] and [{}]\n----------------------------------{}",start_name, end_name, graph);
+                return format!("----------------------------------\n====== NBA 6 Degrees of Freedom Between: \n====== [{}] and [{}]\n----------------------------------{}",start_name, end_name, graph);
             }
             None => {
                 let error_text = format!("Due to insufficient data, it could not establish a connection between {} and {}.\nTry again!", start_name, end_name);
-                return format!("NBA 6 Degrees of Freedom Between: \n[{}] and [{}]\n----------------------------------\n{}", start_name, end_name, error_text);
+                return format!("----------------------------------\n====== NBA 6 Degrees of Freedom Between: \n====== [{}] and [{}]\n----------------------------------\n{}", start_name, end_name, error_text);
             }
         }
         // return format!("Starts with: {:?}", c[v_end as usize]);
