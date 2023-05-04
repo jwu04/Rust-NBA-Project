@@ -19,15 +19,15 @@ pub mod read_file {
     }
 
     pub fn read_player_data() -> Result<HashMap<i32, Player>, Box<dyn Error>> {
+        let player_data = csv::Reader::from_path("../data/players.csv");
         let mut players= HashMap::<i32,  Player>::new();
-        let read_players = csv::Reader::from_path("../data/players.csv");
-
-        for result in read_players?.records() {
+        for result in player_data?.records() {
             let record = result?;
-            let person = Player{id: record[0].parse::<i32>().unwrap(), name: record[1].to_string(), team: Some(Vec::new())};
-            players.insert(record[0].parse::<i32>().unwrap(), person);
+            let id = record[0].parse::<i32>().unwrap();
+            let name = record[1].to_string();
+            let person = Player{id: id, name: name, team: Some(Vec::new())};
+            players.insert(id, person);
         }
-
         return Ok(players)
     }
 
@@ -35,45 +35,55 @@ pub mod read_file {
         let game_data = csv::Reader::from_path("../data/game_player_data.csv");
         let mut team = Vec::<i32>::new();
         let mut temp_tid = -1;
-
         for result in game_data?.records() {
             let record = result?;
-            if record[2].parse::<i32>().unwrap() != temp_tid {
+            let curr_id = record[2].parse::<i32>().unwrap();
+            let player_id = record[4].parse::<i32>().unwrap();
+            if curr_id != temp_tid {
                 for id in 0..(team.len()) {
                     let mut team_clone = team.clone();
                     let current_id = team_clone.swap_remove(id);
                     let team_set = HashSet::from_iter(team_clone.iter().cloned());
-                    let team = Team{team_id: temp_tid, teammate_id: Some(team_set.clone()), year: record[27].to_string()};
-                    if let Some(player_teammates) = players.get_mut(&current_id) {
-                        if let Some(teams) = &mut player_teammates.team {
-                            if teams.len() == 0 {
-                                teams.push(team);
-                            } 
-                            else {
-                                let mut to_push = true;
-                                for season in &mut *teams {
-                                    if season.team_id == temp_tid && season.year == record[27] {
-                                        if let Some(existing_team) = &mut season.teammate_id {
-                                            for diff in existing_team.clone().difference(&team_set) {
-                                                existing_team.insert(*diff);
-                                            }
-                                            to_push = false;
-                                        }
-                                    }
+                    let year = &record[27];
+                    let team = Team{team_id: temp_tid, teammate_id: Some(team_set.clone()), year: year.to_string()};
+                    let all_teams = players.get_mut(&current_id).unwrap().team.as_mut().unwrap();
+                    if all_teams.is_empty() {
+                        all_teams.push(team);
+                    } 
+                    else {
+                        let mut to_push = true;
+                        for season in &mut *all_teams {
+                            if season.team_id == temp_tid && season.year == year.to_string() {
+                                let existing_team = &mut season.teammate_id.as_mut().unwrap();
+                                for diff in existing_team.clone().difference(&team_set) {
+                                    existing_team.insert(*diff);
                                 }
-                                if to_push == true {
-                                    teams.push(team);
-                                }
-                                
+                                to_push = false;
+                                break;
                             }
+                        }
+                        if to_push {
+                            all_teams.push(team);
                         }
                     }
                 }
-                temp_tid = record[2].parse::<i32>().unwrap();
+                temp_tid = curr_id;
                 team.clear();
             }
-            team.push(record[4].parse::<i32>().unwrap());
+            team.push(player_id);
         }
         Ok(players)
+    }
+
+    pub fn read_team_data() -> Result<HashMap<i32, String>, Box<dyn Error>> {
+        let team_data = csv::Reader::from_path("../data/teams.csv");
+        let mut teams= HashMap::<i32, String>::new();
+        for result in team_data?.records() {
+            let record = result?;
+            let id = record[0].parse::<i32>().unwrap();
+            let name = record[1].to_string();
+            teams.insert(id, name);
+        }
+        return Ok(teams)
     }
 }
