@@ -1,7 +1,7 @@
 use std::{time::{Instant}};
 use rand::prelude::*;
 use std::collections::HashMap;
-use regex::Regex;
+use regex::RegexSet;
 use crate::algo::search::get_size;
 use crate::parse_data::read_file::Player;
 mod parse_data;
@@ -19,24 +19,23 @@ fn main() {
         println!("{}", graph);
     }
     let duration = start.elapsed();
-    println!("\nSearch completed in: {:?}", duration);
+    println!("----------------------------------\n====== Search completed in: {:?}", duration);
 }
 
 fn take_input(players: &HashMap<i32, Player>) -> (i32, i32) {
     let mut line = String::new();
     println!("====== Do you want to input two basketball players? (y/n): ");
     std::io::stdin().read_line(&mut line).unwrap();
-    let no_re = Regex::new(r"^n+?o*$").unwrap();
-    let yes_re = Regex::new(r"^y+?e*s*$").unwrap();
-    let no_result = no_re.is_match(line.to_lowercase().strip_suffix("\r\n").unwrap());
-    let yes_result = yes_re.is_match(line.to_lowercase().strip_suffix("\r\n").unwrap());
-    if no_result {
+    let re = RegexSet::new(&[r"^n+?o*$", r"y+?e*s*$", r"^$"]).unwrap();
+    line = line.strip_suffix("\r\n").unwrap().to_lowercase();
+    let result = re.matches(&line);
+    if result.matched(0) || result.matched(2) {
         let size = get_size(&players);
         let rng_start = thread_rng().gen_range(1..=size) as i32;
         let rng_end = thread_rng().gen_range(1..=size) as i32;
         return (rng_start, rng_end)
     }
-    else if yes_result {
+    else if result.matched(1) {
         let mut player_a = String::new();
         println!("====== Input the first basketball player (from 1949-2019):");
         std::io::stdin().read_line(&mut player_a).unwrap();
@@ -63,7 +62,7 @@ fn take_input(players: &HashMap<i32, Player>) -> (i32, i32) {
 }
 
 fn invalid_input(players: &HashMap<i32, Player>) -> (i32, i32) {
-    println!("====== Did not get valid input, generating two random players in history... ======");
+    println!("====== Did not get valid input, generating two random players from 1949-2019...");
     let size = get_size(&players);
     let rng_start = thread_rng().gen_range(1..=size) as i32;
     let rng_end = thread_rng().gen_range(1..=size) as i32;

@@ -45,19 +45,22 @@ pub mod search {
                         let player_one = players.get(&parsed[index].parse::<i32>().unwrap()).unwrap();
                         let player_two = players.get(&(parsed[index+1].parse::<i32>().unwrap())).unwrap();
                         let cxn = same_team_season(&players, player_one.id, player_two.id);
-                        graph.push_str(&format!("\n====== {} -- [{}] -- {}", player_one.name, cxn, player_two.name))
+                        graph.push_str(&format!("\n====== {} -- [{}] -- {}", player_one.name, cxn, player_two.name));
+                        if index == parsed.len()-2 {
+                            graph.push_str(&format!("\n----------------------------------\n====== There are {} degree(s) of separation between [{}] and [{}]!", parsed.len()-2, players.get(&parsed[0].parse::<i32>().unwrap()).unwrap().name, player_two.name));
+                        }
                     }
                 } 
                 else {
                     let player_one = players.get(&parsed[0].parse::<i32>().unwrap()).unwrap();
                     let player_two = players.get(&(parsed[0].parse::<i32>().unwrap())).unwrap();
                     let cxn = same_team_season(&players, player_one.id, player_two.id);
-                    graph.push_str(&format!("\n====== {} -- [{}] -- {}", player_one.name, cxn, player_two.name))
+                    graph.push_str(&format!("\n====== {0} -- [{1}] -- {2}\n====== There are {3} degree(s) of separation between [{0}] and [{2}]!", player_one.name, cxn, player_two.name, parsed.len()-1))
                 }
                 return format!("----------------------------------\n====== NBA 6 Degrees of Freedom Between: \n====== [{}] and [{}]\n----------------------------------{}",start_name, end_name, graph);
             }
             None => {
-                let error_text = format!("Due to insufficient data, it could not establish a connection between {} and {}.\nTry again!", start_name, end_name);
+                let error_text = format!("====== Due to insufficient data, it could not establish a connection between {} and {}.\n====== Try again!", start_name, end_name);
                 return format!("----------------------------------\n====== NBA 6 Degrees of Freedom Between: \n====== [{}] and [{}]\n----------------------------------\n{}", start_name, end_name, error_text);
             }
         }
