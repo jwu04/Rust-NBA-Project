@@ -9,15 +9,10 @@ mod algo;
 
 fn main() {
     let start = Instant::now();
-    let mut players = parse_data::read_file::read_player_data();
-    let input = take_input(&players.as_ref().unwrap());
-    if let Result::Ok(data) = players {
-        players = parse_data::read_file::read_game_data(data.clone());
-    }
-    if let Result::Ok(data) = players {
-        let graph = algo::search::bfs(data, input.0, input.1);
-        println!("{}", graph);
-    }
+    let players = parse_data::read_file::read_player_data().unwrap();
+    let vertices = take_input(&players);
+    let graph = algo::search::bfs(players,  vertices.0, vertices.1);
+    println!("{}", graph);
     let duration = start.elapsed();
     println!("----------------------------------\n====== Search completed in: {:?}", duration);
 }
@@ -26,10 +21,9 @@ fn take_input(players: &HashMap<i32, Player>) -> (i32, i32) {
     let mut line = String::new();
     println!("====== Do you want to input two basketball players? (y/n): ");
     std::io::stdin().read_line(&mut line).unwrap();
-    let re = RegexSet::new(&[r"^n+?o*$", r"y+?e*s*$", r"^$"]).unwrap();
-    line = line.strip_suffix("\r\n").unwrap().to_lowercase();
-    let result = re.matches(&line);
-    if result.matched(0) || result.matched(2) {
+    let re = RegexSet::new(&[r"^n*?o*$", r"y+?e*s*$"]).unwrap();
+    let result = re.matches(&line.strip_suffix("\r\n").unwrap().to_lowercase());
+    if result.matched(0) {
         let size = get_size(&players);
         let rng_start = thread_rng().gen_range(1..=size) as i32;
         let rng_end = thread_rng().gen_range(1..=size) as i32;

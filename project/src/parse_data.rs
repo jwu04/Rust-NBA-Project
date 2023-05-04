@@ -28,10 +28,11 @@ pub mod read_file {
             let person = Player{id: id, name: name, team: Some(Vec::new())};
             players.insert(id, person);
         }
+        players = read_game_data(players).unwrap();
         return Ok(players)
     }
 
-    pub fn read_game_data(mut players: HashMap<i32, Player>) -> Result<HashMap<i32, Player>, Box<dyn Error>> {
+    fn read_game_data(mut players: HashMap<i32, Player>) -> Result<HashMap<i32, Player>, Box<dyn Error>> {
         let game_data = csv::Reader::from_path("../data/game_player_data.csv");
         let mut team = Vec::<i32>::new();
         let mut temp_tid = -1;

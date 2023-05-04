@@ -8,7 +8,7 @@ pub mod search {
         let p1_seasons = players.get(&p1_id).unwrap().team.as_ref().unwrap();
         let teams = parse_data::read_file::read_team_data().unwrap();
         if p1_id == p2_id {
-            return format!("{:?}, {} Season", teams.get(&p1_seasons[0].team_id).unwrap(), p1_seasons[0].year);
+            return format!("{}, {} Season", teams.get(&p1_seasons[0].team_id).unwrap(), p1_seasons[0].year);
         }
         let mut team_year = "".to_string();
         for season in p1_seasons {
@@ -47,7 +47,7 @@ pub mod search {
                         let cxn = same_team_season(&players, player_one.id, player_two.id);
                         graph.push_str(&format!("\n====== {} -- [{}] -- {}", player_one.name, cxn, player_two.name));
                         if index == parsed.len()-2 {
-                            graph.push_str(&format!("\n----------------------------------\n====== There are {} degree(s) of separation between [{}] and [{}]!", parsed.len()-2, players.get(&parsed[0].parse::<i32>().unwrap()).unwrap().name, player_two.name));
+                            graph.push_str(&format!("\n----------------------------------\n====== Found {} degree(s) of separation between [{}] and [{}]!", parsed.len()-1, players.get(&parsed[0].parse::<i32>().unwrap()).unwrap().name, player_two.name));
                         }
                     }
                 } 
@@ -55,7 +55,7 @@ pub mod search {
                     let player_one = players.get(&parsed[0].parse::<i32>().unwrap()).unwrap();
                     let player_two = players.get(&(parsed[0].parse::<i32>().unwrap())).unwrap();
                     let cxn = same_team_season(&players, player_one.id, player_two.id);
-                    graph.push_str(&format!("\n====== {0} -- [{1}] -- {2}\n====== There are {3} degree(s) of separation between [{0}] and [{2}]!", player_one.name, cxn, player_two.name, parsed.len()-1))
+                    graph.push_str(&format!("\n====== {0} -- [{1}] -- {2}\n====== Found {3} degree(s) of separation between [{0}] and [{2}]!", player_one.name, cxn, player_two.name, parsed.len()-1))
                 }
                 return format!("----------------------------------\n====== NBA 6 Degrees of Freedom Between: \n====== [{}] and [{}]\n----------------------------------{}",start_name, end_name, graph);
             }
