@@ -61,12 +61,12 @@ fn take_input(players: &HashMap<i32, Player>) -> (i32, i32) {
         let mut player_a = String::new();
         println!("====== Input the first basketball player (from 1949-2019):");
         std::io::stdin().read_line(&mut player_a).unwrap();
-        let p1_id = algo::search::find_id(&players, player_a.strip_suffix("\r\n").unwrap().to_string());
+        let p1_id = algo::search::find_id(&players, player_a);
         if p1_id != -1 {
             let mut player_b = String::new();
             println!("====== Input the second basketball player (from 1949-2019):");
             std::io::stdin().read_line(&mut player_b).unwrap();
-            let p2_id = algo::search::find_id(&players, player_b.strip_suffix("\r\n").unwrap().to_string());
+            let p2_id = algo::search::find_id(&players, player_b);
             if p2_id != -1 {
                 return (p1_id, p2_id)
             }

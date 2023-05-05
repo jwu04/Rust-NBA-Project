@@ -3,16 +3,18 @@ pub mod search {
     use std::collections::HashMap;
     use std::{error::Error};
     use rand::prelude::*;
+    use crate::remove_newline;
     use crate::parse_data;
     use crate::parse_data::read_file::Player;
 
     // Function to find ID of a player given a string
-    pub fn find_id(players: &HashMap<i32, Player>, mut p1: String) -> i32 {
-        p1 = p1.to_lowercase();
+    pub fn find_id(players: &HashMap<i32, Player>, p1: String) -> i32 {
+        let mut lowercase = p1.to_lowercase();
+        let p = remove_newline(&mut lowercase);
         for p_id in 1..get_max_id(players) as i32 {
             let player = players.get(&p_id).unwrap();
             let p_name = player.get_name().to_lowercase();
-            if p_name.eq(&p1) {
+            if p_name.eq(&p) {
                 return player.get_id()
             }
         }
