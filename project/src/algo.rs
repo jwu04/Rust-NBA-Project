@@ -1,10 +1,13 @@
 pub mod search {
     use std::collections::VecDeque;
     use std::collections::HashMap;
+    use std::{error::Error};
+    use rand::prelude::*;
     use crate::parse_data;
     use crate::parse_data::read_file::Player;
 
-    pub fn find_id(players: &HashMap<i32, Player>, p1: String) -> i32 {
+    pub fn find_id(players: &HashMap<i32, Player>, mut p1: String) -> i32 {
+        p1 = p1.to_lowercase();
         for p_id in 1..get_max_id(players) as i32 {
             let player = players.get(&p_id).unwrap();
             let p_name = player.get_name().to_lowercase();
@@ -16,7 +19,7 @@ pub mod search {
         return -1
     }
 
-    pub fn bfs(players: HashMap<i32, Player>, v_start: i32, v_end: i32) -> String {
+    pub fn bfs(players: &HashMap<i32, Player>, v_start: i32, v_end: i32) -> Result<String, Box<dyn Error>> {
         let sizes = get_max_id(&players);
         let mut distance: Vec<Option<u32>> = vec![None;sizes];
         let mut component: Vec<Option<String>> = vec![None;sizes];
@@ -49,14 +52,21 @@ pub mod search {
                 }
             }
         }
-        return bfs_graph(component, players, v_start, v_end);
+        return bfs_graph(component, &players, v_start, v_end);
     }
 
     pub fn get_max_id(players: &HashMap<i32, Player>) -> usize {
         return players.len()+1
     }
 
-    fn bfs_graph(c: Vec<Option<String>>, players: HashMap<i32, Player>, v_start: i32, v_end: i32) -> String {
+    pub fn gen_ids(players: &HashMap<i32, Player>) -> (i32, i32) {
+        let size = get_max_id(&players);
+        let rng_start = thread_rng().gen_range(1..=size) as i32;
+        let rng_end = thread_rng().gen_range(1..=size) as i32;
+        return (rng_start, rng_end)
+    }
+
+    fn bfs_graph(c: Vec<Option<String>>, players: &HashMap<i32, Player>, v_start: i32, v_end: i32) -> Result<String, Box<dyn Error>> {
         let start_name = players.get(&v_start).unwrap().get_name();
         let end_name = players.get(&v_end).unwrap().get_name();
         let edges = &c[v_end as usize];
@@ -69,41 +79,64 @@ pub mod search {
                     for index in 0..edges_len-1 as usize {
                         let player_one = players.get(&parsed[index].parse::<i32>().unwrap()).unwrap();
                         let player_two = players.get(&(parsed[index+1].parse::<i32>().unwrap())).unwrap();
-                        let cxn = same_team_season(&players, player_one.get_id(), player_two.get_id());
-                        graph.push_str(&format!("\n====== {} -- [{}] -- {}", player_one.get_name(), cxn, player_two.get_name()));
-                        if index == edges_len-2 {
-                            graph.push_str(&format!("\n----------------------------------\n====== Found {} degree(s) of separation between [{}] and [{}]!", edges_len-1, player_one.get_name(), player_two.get_name()));
+                        let cxns = same_team_season(&players, player_one.get_id(), player_two.get_id());
+                        match cxns {
+                            Ok(cxn) => {
+                                graph.push_str(&format!("\n====== {} -- [{}] -- {}", player_one.get_name(), cxn, player_two.get_name()));
+                                if index == edges_len-2 {
+                                    graph.push_str(&format!("\n----------------------------------\n====== Found {} degree(s) of separation between [{}] and [{}]!", edges_len-1, player_one.get_name(), player_two.get_name()));
+                                }
+                            }
+                            Err(e) => {
+                                return Err(e)
+                            }
                         }
+
                     }
                 } 
                 else {
                     let player = players.get(&parsed[0].parse::<i32>().unwrap()).unwrap();
-                    let cxn = same_team_season(&players, player.get_id(), player.get_id());
-                    graph.push_str(&format!("\n====== {0} -- [{1}] -- {2}\n====== Found {3} degree(s) of separation between [{0}] and [{2}]!", player.name, cxn, player.name, edges_len-1))
+                    let cxns = same_team_season(&players, player.get_id(), player.get_id());
+                    match cxns {
+                        Ok(cxn) => {
+                            graph.push_str(&format!("\n====== {0} -- [{1}] -- {2}\n====== Found {3} degree(s) of separation between [{0}] and [{2}]!", player.name, cxn, player.name, edges_len-1));
+                        }
+                        Err(e) => {
+                            return Err(e)
+                        }
+                    }
                 }
-                return format!("----------------------------------\n====== NBA 6 Degrees of Freedom Between: \n====== [{}] and [{}]\n----------------------------------{}",start_name, end_name, graph);
+                return Ok(format!("----------------------------------\n====== NBA 6 Degrees of Freedom Between: \n====== [{}] and [{}]\n----------------------------------{}",start_name, end_name, graph));
             }
             None => {
                 let error_text = format!("====== Due to insufficient data, it could not establish a connection between {} and {}.\n====== Try again!", start_name, end_name);
-                return format!("----------------------------------\n====== NBA 6 Degrees of Freedom Between: \n====== [{}] and [{}]\n----------------------------------\n{}", start_name, end_name, error_text);
+                return Ok(format!("----------------------------------\n====== NBA 6 Degrees of Freedom Between: \n====== [{}] and [{}]\n----------------------------------\n{}", start_name, end_name, error_text));
             }
         }
     }
 
-    fn same_team_season(players: &HashMap<i32, Player>, p1_id: i32, p2_id: i32) -> String {
+    fn same_team_season(players: &HashMap<i32, Player>, p1_id: i32, p2_id: i32) -> Result<String, Box<dyn Error>> {
         let p1_seasons = players.get(&p1_id).unwrap().get_team();
-        let teams = parse_data::read_file::read_team_data().unwrap();
-        if p1_id == p2_id {
-            return format!("{}, {} Season", teams.get(&p1_seasons[0].get_team_id()).unwrap(), p1_seasons[0].get_year());
-        }
-        let mut team_year = "".to_string();
-        for season in p1_seasons {
-            if season.has_teammate_id(p2_id) {
-                team_year.push_str(&format!("{}, {} Season", teams.get(&season.get_team_id()).unwrap(), season.get_year()));
-                break;
+        let teams_data = parse_data::read_file::read_team_data();
+        match teams_data {
+            Ok(teams) => {
+                if p1_id == p2_id {
+                    return Ok(format!("{}, {} Season", teams.get(&p1_seasons[0].get_team_id()).unwrap(), p1_seasons[0].get_year()));
+                }
+                let mut team_year = "".to_string();
+                for season in p1_seasons {
+                    if season.has_teammate_id(p2_id) {
+                        team_year.push_str(&format!("{}, {} Season", teams.get(&season.get_team_id()).unwrap(), season.get_year()));
+                        break;
+                    }
+                }
+                return Ok(team_year)
+            }
+            Err(e) => {
+                return Err(e)
             }
         }
-        return team_year
+
     }
 
 }

@@ -1,20 +1,34 @@
 use std::{time::{Instant}};
-use rand::prelude::*;
 use std::collections::HashMap;
 use regex::RegexSet;
-use crate::algo::search::get_max_id;
 use crate::parse_data::read_file::Player;
 mod parse_data;
 mod algo;
+#[cfg(test)]
+mod test;
 
 fn main() {
     let start = Instant::now();
-    let players = parse_data::read_file::read_player_data().unwrap();
-    let vertices = take_input(&players);
-    let graph = algo::search::bfs(players,  vertices.0, vertices.1);
-    println!("{}", graph);
-    let duration = start.elapsed();
-    println!("----------------------------------\n====== Search completed in: {:?}", duration);
+    let result = parse_data::read_file::read_player_data();
+    match result {
+        Ok(players) => {
+            let vertices = take_input(&players);
+            let graph = algo::search::bfs(&players,  vertices.0, vertices.1);
+            match graph {
+                Ok(bfs_graph) => {
+                    println!("{}", bfs_graph);
+                    let duration = start.elapsed();
+                    println!("----------------------------------\n====== Search completed in: {:?}", duration);   
+                }
+                Err(e) => {
+                    eprintln!("{}", e);
+                }
+            }
+        }
+        Err(e) => {
+            eprintln!("{}", e);
+        }
+    }
 }
 
 fn take_input(players: &HashMap<i32, Player>) -> (i32, i32) {
@@ -24,10 +38,8 @@ fn take_input(players: &HashMap<i32, Player>) -> (i32, i32) {
     let re = RegexSet::new(&[r"^n*?o*$", r"y+?e*s*$"]).unwrap();
     let result = re.matches(&line.strip_suffix("\r\n").unwrap().to_lowercase());
     if result.matched(0) {
-        let size = get_max_id(&players);
-        let rng_start = thread_rng().gen_range(1..=size) as i32;
-        let rng_end = thread_rng().gen_range(1..=size) as i32;
-        return (rng_start, rng_end)
+        let rng = algo::search::gen_ids(players);
+        return (rng.0, rng.1)
     }
     else if result.matched(1) {
         let mut player_a = String::new();
@@ -57,8 +69,6 @@ fn take_input(players: &HashMap<i32, Player>) -> (i32, i32) {
 
 fn invalid_input(players: &HashMap<i32, Player>) -> (i32, i32) {
     println!("====== Did not get valid input, generating two random players from 1949-2019...");
-    let size = get_max_id(&players);
-    let rng_start = thread_rng().gen_range(1..=size) as i32;
-    let rng_end = thread_rng().gen_range(1..=size) as i32;
-    return (rng_start, rng_end)
+    let rng = algo::search::gen_ids(players);
+    return (rng.0, rng.1)
 }

@@ -12,7 +12,7 @@ pub mod read_file {
     }
 
     impl Player {
-        fn new(id: i32, name: String, team: Option<Vec<Team>>) -> Player {
+        pub fn new(id: i32, name: String, team: Option<Vec<Team>>) -> Player {
             return Player {id: id, name: name, team: team}
         }
     
@@ -37,7 +37,7 @@ pub mod read_file {
     }
 
     impl Team {
-        fn new(team_id: i32, teammate_id: Option<HashSet<i32>>, year: &String) -> Team {
+        pub fn new(team_id: i32, teammate_id: Option<HashSet<i32>>, year: &String) -> Team {
             return Team{team_id: team_id, teammate_id: teammate_id, year: year.to_string()}
         }
 
@@ -68,8 +68,27 @@ pub mod read_file {
             let person = Player::new(id, name, Some(Vec::new()));
             players.insert(id, person);
         }
-        players = read_game_data(players).unwrap();
-        return Ok(players)
+        let game_data = read_game_data(players);
+        match game_data {
+            Ok(data) => {
+                return Ok(data)
+            }
+            Err(e) => {
+                return Err(e)
+            }
+        }
+    }
+
+    pub fn read_team_data() -> Result<HashMap<i32, String>, Box<dyn Error>> {
+        let team_data = csv::Reader::from_path("../data/teams.csv");
+        let mut teams= HashMap::<i32, String>::new();
+        for result in team_data?.records() {
+            let record = result?;
+            let id = record[0].parse::<i32>().unwrap();
+            let name = record[1].to_string();
+            teams.insert(id, name);
+        }
+        return Ok(teams)
     }
 
     fn read_game_data(mut players: HashMap<i32, Player>) -> Result<HashMap<i32, Player>, Box<dyn Error>> {
@@ -114,17 +133,5 @@ pub mod read_file {
             team.push(player_id);
         }
         Ok(players)
-    }
-
-    pub fn read_team_data() -> Result<HashMap<i32, String>, Box<dyn Error>> {
-        let team_data = csv::Reader::from_path("../data/teams.csv");
-        let mut teams= HashMap::<i32, String>::new();
-        for result in team_data?.records() {
-            let record = result?;
-            let id = record[0].parse::<i32>().unwrap();
-            let name = record[1].to_string();
-            teams.insert(id, name);
-        }
-        return Ok(teams)
     }
 }
