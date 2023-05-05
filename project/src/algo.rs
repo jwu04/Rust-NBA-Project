@@ -109,7 +109,7 @@ pub mod search {
                             Ok(cxn) => {
                                 graph.push_str(&format!("\n====== {} -- [{}] -- {}", player_one.get_name(), cxn, player_two.get_name()));
                                 if index == edges_len-2 {
-                                    graph.push_str(&format!("\n----------------------------------\n====== Found {0} degree(s) of separation between [{1}] and [{2}]!\n====== {3} has an average degrees of freedom of {4}!", edges_len-1, player_one.get_name(), player_two.get_name(), start_name, average_distance(&d)));
+                                    graph.push_str(&format!("\n----------------------------------\n====== Found {0} degree(s) of separation between [{1}] and [{2}]!\n====== {3} has an average degrees of separation of {4}!", edges_len-1, player_one.get_name(), player_two.get_name(), start_name, average_distance(&d)));
                                 }
                             }
                             Err(e) => {
@@ -124,18 +124,18 @@ pub mod search {
                     let cxns = same_team_season(&players, player.get_id(), player.get_id());
                     match cxns {
                         Ok(cxn) => {
-                            graph.push_str(&format!("\n====== {0} -- [{1}] -- {2}\n====== Found {3} degree(s) of separation between [{0}] and [{2}]!\n====== {0} has an average degrees of freedom of {4}!", player.name, cxn, player.name, edges_len, average_distance(&d)));
+                            graph.push_str(&format!("\n====== {0} -- [{1}] -- {2}\n====== Found {3} degree(s) of separation between [{0}] and [{2}]!\n====== {0} has an average degrees of separation of {4}!", player.name, cxn, player.name, edges_len, average_distance(&d)));
                         }
                         Err(e) => {
                             return Err(e)
                         }
                     }
                 }
-                return Ok(format!("----------------------------------\n====== NBA 6 Degrees of Freedom Between: \n====== [{}] and [{}]\n----------------------------------{}",start_name, end_name, graph));
+                return Ok(format!("----------------------------------\n====== NBA 6 Degrees of Separation Between: \n====== [{}] and [{}]\n----------------------------------{}",start_name, end_name, graph));
             }
             None => {
                 let error_text = format!("====== Due to insufficient data, it could not establish a connection between {} and {}.\n====== Try again!", start_name, end_name);
-                return Ok(format!("----------------------------------\n====== NBA 6 Degrees of Freedom Between: \n====== [{}] and [{}]\n----------------------------------\n{}", start_name, end_name, error_text));
+                return Ok(format!("----------------------------------\n====== NBA 6 Degrees of Separation Between: \n====== [{}] and [{}]\n----------------------------------\n{}", start_name, end_name, error_text));
             }
         }
     }
