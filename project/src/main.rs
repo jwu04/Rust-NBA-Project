@@ -2,7 +2,7 @@ use std::{time::{Instant}};
 use rand::prelude::*;
 use std::collections::HashMap;
 use regex::RegexSet;
-use crate::algo::search::get_size;
+use crate::algo::search::get_max_id;
 use crate::parse_data::read_file::Player;
 mod parse_data;
 mod algo;
@@ -24,7 +24,7 @@ fn take_input(players: &HashMap<i32, Player>) -> (i32, i32) {
     let re = RegexSet::new(&[r"^n*?o*$", r"y+?e*s*$"]).unwrap();
     let result = re.matches(&line.strip_suffix("\r\n").unwrap().to_lowercase());
     if result.matched(0) {
-        let size = get_size(&players);
+        let size = get_max_id(&players);
         let rng_start = thread_rng().gen_range(1..=size) as i32;
         let rng_end = thread_rng().gen_range(1..=size) as i32;
         return (rng_start, rng_end)
@@ -57,7 +57,7 @@ fn take_input(players: &HashMap<i32, Player>) -> (i32, i32) {
 
 fn invalid_input(players: &HashMap<i32, Player>) -> (i32, i32) {
     println!("====== Did not get valid input, generating two random players from 1949-2019...");
-    let size = get_size(&players);
+    let size = get_max_id(&players);
     let rng_start = thread_rng().gen_range(1..=size) as i32;
     let rng_end = thread_rng().gen_range(1..=size) as i32;
     return (rng_start, rng_end)
