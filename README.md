@@ -41,4 +41,58 @@ $ cargo run --release
 
 ---
 
+The following are sample outputs of the program:
+```
+====== Do you want to input two basketball players? (y/n): 
+n
+----------------------------------
+====== NBA 6 Degrees of Separation Between:
+====== [Jack Burmaster] and [Bobby Lewis]
+----------------------------------
+====== Jack Burmaster -- [Cleveland Rebels, 1949-50 Season] -- Noble Jorgensen
+====== Noble Jorgensen -- [Philadelphia 76ers, 1950-51 Season] -- Dolph Schayes
+====== Dolph Schayes -- [Philadelphia 76ers, 1962-63 Season] -- Len Chappell
+====== Len Chappell -- [Cleveland Cavaliers, 1970-71 Season] -- Bobby Lewis
+----------------------------------
+====== Found 4 degree(s) of separation between [Len Chappell] and [Bobby Lewis]!
+====== Jack Burmaster has an average degrees of separation of 4.6909356!
+----------------------------------
+====== Search completed in: 1.5031128s
+```
+```
+====== Do you want to input two basketball players? (y/n):
+n
+----------------------------------
+====== NBA 6 Degrees of Separation Between:
+====== [Kevin Hervey] and [Allan Ray]
+----------------------------------
+====== Due to insufficient data, it could not establish a connection between Kevin Hervey and Allan Ray.
+====== Try again!
+----------------------------------
+====== Search completed in: 1.4800397s
+```
+```
+====== Do you want to input two basketball players? (y/n): 
+y
+====== Input the first basketball player (from 1949-2019):
+lebron james
+====== Input the second basketball player (from 1949-2019):
+wilt chamberlain
+----------------------------------
+====== NBA 6 Degrees of Separation Between:
+====== [LeBron James] and [Wilt Chamberlain]
+----------------------------------
+====== LeBron James -- [Cleveland Cavaliers, 2004-05 Season] -- Scott Williams
+====== Scott Williams -- [Chicago Bulls, 1990-91 Season] -- Bill Cartwright
+====== Bill Cartwright -- [New York Knicks, 1979-80 Season] -- Jim Cleamons
+====== Jim Cleamons -- [Los Angeles Lakers, 1971-72 Season] -- Wilt Chamberlain
+----------------------------------
+====== Found 4 degree(s) of separation between [Jim Cleamons] and [Wilt Chamberlain]!
+====== LeBron James has an average degrees of separation of 2.6204107!
+----------------------------------
+====== Search completed in: 13.5168005s
+```
+
+---
+
 Kaggle Dataset: https://www.kaggle.com/datasets/harisbeslic/nba-player-data-by-game-from-1949-to-2019?select=all_game_scores.csv
