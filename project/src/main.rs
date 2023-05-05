@@ -48,7 +48,9 @@ fn take_input(players: &HashMap<i32, Player>) -> (i32, i32) {
     std::io::stdin().read_line(&mut line).unwrap();
     // Using regex to determine if you inputted a 'yes' or 'no'
     let re = RegexSet::new(&[r"^n*?o*$", r"y+?e*s*$"]).unwrap();
-    let result = re.matches(&line.strip_suffix("\r\n").unwrap().to_lowercase());
+    let mut lowercase = line.to_lowercase();
+    let remove_nl = remove_newline(&mut lowercase);
+    let result = re.matches(&remove_nl);
     // If you said no, randomly selected two NBA players and try to connect them
     if result.matched(0) {
         let rng = algo::search::gen_ids(players);
@@ -86,4 +88,15 @@ fn invalid_input(players: &HashMap<i32, Player>) -> (i32, i32) {
     println!("====== Did not get valid input, generating two random players from 1949-2019...");
     let rng = algo::search::gen_ids(players);
     return (rng.0, rng.1)
+}
+
+// Helper method to remove trailing newlines (for cross OS support)
+fn remove_newline(line: &mut String) -> &str {
+    if line.ends_with('\n') {
+        line.pop();
+        if line.ends_with('\r') {
+            line.pop();
+        }
+    }
+    return line
 }
