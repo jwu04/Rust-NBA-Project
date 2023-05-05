@@ -38,3 +38,7 @@ $ cargo run --release
 ```
 5. Input text according to prompt!
 6. Enjoy!
+
+---
+
+Kaggle Dataset: https://www.kaggle.com/datasets/harisbeslic/nba-player-data-by-game-from-1949-to-2019?select=all_game_scores.csv
