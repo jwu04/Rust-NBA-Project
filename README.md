@@ -28,9 +28,9 @@ $ git clone https://github.com/jwu04/Rust-NBA-Project.git
 ```
 $ cd Rust-NBA-Project/
 ```
-3. CD into source
+3. CD into the project folder
 ```
-$ cd src/
+$ cd project/
 ```
 4. Compile the program
 ```
