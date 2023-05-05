@@ -3,6 +3,7 @@ mod test_cases {
     use std::vec;
     use std::collections::HashSet;
 
+    // Test to make sure the randomly generated vertices fall within our dataset
     #[test]
     fn test_gen_id() {
         let players = crate::parse_data::read_file::read_player_data();
@@ -16,6 +17,14 @@ mod test_cases {
         }
     }
 
+    // Tests BFS in a way that makes sure that you can allow for any id for the start and end vertex
+    // The idea is that if you can run it from one static id to the entire dataset, you can imagine
+    // that BFS will run on any point in the data
+    // ? Q: What if the graph the program shows me isn't right?
+    // ! A: Well, the program either shows you a connection or not. I have manually checked each case
+    // ! by cross referencing on the internet to make sure that two teammates actually have played with each otehr.
+    // ! That includes running the program on the same vertex for start and end, invalid vertices, and any degrees of freedom
+    // ! between two NBA players
     #[test]
     fn test_bfs() {
         let players = crate::parse_data::read_file::read_player_data();
@@ -32,6 +41,7 @@ mod test_cases {
         
     }
     
+    // Test to make sure the number returns is the max_id that is found from the dataset
     #[test]
     fn test_get_max_id() {
         let players = crate::parse_data::read_file::read_player_data().unwrap();
@@ -39,6 +49,7 @@ mod test_cases {
         assert_eq!(num as i32, 4821)
     }
 
+    // Test to make sure that the ID found from my function is correct
     #[test]
     fn test_find_id() {
         let players = crate::parse_data::read_file::read_player_data().unwrap();
@@ -50,6 +61,7 @@ mod test_cases {
         }
     }
     
+    // Test to make sure my Player struct can be instantiated and its implemented functions also work.
     #[test]
     fn test_player_attributes() {
         let dude = crate::parse_data::read_file::Player::new(0, "Real Dude".to_string(), Some(vec![crate::parse_data::read_file::Team::new(0, None, &format!("2014-5"))]));
@@ -58,6 +70,7 @@ mod test_cases {
         assert_eq!(dude.get_team(), &dude.clone().team.unwrap());
     }
 
+    // Test to make sure my Team struct can be instantiated and its implemented functions also work.
     #[test]
     fn test_team_attributes() {
         let team = crate::parse_data::read_file::Team::new(0, Some(HashSet::new()), &format!("2014-5"));

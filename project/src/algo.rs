@@ -6,6 +6,7 @@ pub mod search {
     use crate::parse_data;
     use crate::parse_data::read_file::Player;
 
+    // Function to find ID of a player given a string
     pub fn find_id(players: &HashMap<i32, Player>, mut p1: String) -> i32 {
         p1 = p1.to_lowercase();
         for p_id in 1..get_max_id(players) as i32 {
@@ -19,15 +20,27 @@ pub mod search {
         return -1
     }
 
-    pub fn bfs(players: &HashMap<i32, Player>, v_start: i32, v_end: i32) -> Result<String, Box<dyn Error>> {
+    // Function that performs BFS 
+    pub fn bfs(players: &HashMap<i32, Player>, mut v_start: i32, mut v_end: i32) -> Result<String, Box<dyn Error>> {
         let sizes = get_max_id(&players);
         let mut distance: Vec<Option<u32>> = vec![None;sizes];
         let mut component: Vec<Option<String>> = vec![None;sizes];
+        // First verifies that the given vertices are valid
+        // If not, then replace the vertices with ones that are valid (randomly generated)
+        if !verify_vertices(players, v_start, v_end) {
+            let nums = gen_ids(players);
+            v_start = nums.0;
+            v_end = nums.1;
+        }
+        // Set the vectors of component and distance of the starting vector
         component[v_start as usize] = Some(players.get(&v_start).unwrap().get_id().to_string());
         distance[v_start as usize] = Some(0);
+        // Initialize a Deque and push the starting vertex
         let mut queue: VecDeque<i32> = VecDeque::new();
         queue.push_back(v_start);
+        // Keep looping through the Deque until there are no more players to loop through
         while let Some(v) = queue.pop_front() {
+            // This creates a vector of all of a player's teammates
             let mut teammates = Vec::<i32>::new();
             let player_career = players.get(&v).unwrap().get_team();
             for season in player_career {
@@ -38,9 +51,12 @@ pub mod search {
                     }
                 }
             }
+            // Looping through all the player's teammates
             for edge in &teammates {
+                // If there is no distance, add 1 + previous distance
                 if let None = distance[*edge as usize] {
                     distance[*edge as usize] = Some(distance[v as usize].unwrap() + 1);
+                    //  Creates a string of vertices and edges that connects player A to player B
                     let connect_player = players.get(&edge).unwrap();
                     if let Some(component_id) = &component[v as usize] {
                         let mut vertex_id = component_id.to_string();
@@ -48,6 +64,7 @@ pub mod search {
                         vertex_id.push_str(&format!(",{}", edge_id));
                         component[*edge as usize] = Some(vertex_id);
                     }
+                    // Push teammate ID to the deque
                     queue.push_back(*edge); 
                 }
             }
@@ -55,10 +72,13 @@ pub mod search {
         return bfs_graph(component, &players, v_start, v_end);
     }
 
+    // Function to get the max_id of a player
+    // * The max_id is 4821, but the HashMap length is 4820, which is why I add 1
     pub fn get_max_id(players: &HashMap<i32, Player>) -> usize {
         return players.len()+1
     }
 
+    // Function to generate two random vertices within the dataset
     pub fn gen_ids(players: &HashMap<i32, Player>) -> (i32, i32) {
         let size = get_max_id(&players);
         let rng_start = thread_rng().gen_range(1..=size) as i32;
@@ -66,11 +86,16 @@ pub mod search {
         return (rng_start, rng_end)
     }
 
+    // Function that creates the 'graph' of our players
     fn bfs_graph(c: Vec<Option<String>>, players: &HashMap<i32, Player>, v_start: i32, v_end: i32) -> Result<String, Box<dyn Error>> {
         let start_name = players.get(&v_start).unwrap().get_name();
         let end_name = players.get(&v_end).unwrap().get_name();
         let edges = &c[v_end as usize];
+        // Checking to see if there is a connection
         match edges {
+            // If there is, turn the string of IDs into i32s to get the name
+            // Then format it into a string and concatenate it with another string
+            // * Checks the edge case if the player IDs are the same as well
             Some(edge_string) => {
                 let parsed = edge_string.split(',').collect::<Vec<&str>>(); 
                 let edges_len = parsed.len();
@@ -99,7 +124,7 @@ pub mod search {
                     let cxns = same_team_season(&players, player.get_id(), player.get_id());
                     match cxns {
                         Ok(cxn) => {
-                            graph.push_str(&format!("\n====== {0} -- [{1}] -- {2}\n====== Found {3} degree(s) of separation between [{0}] and [{2}]!", player.name, cxn, player.name, edges_len-1));
+                            graph.push_str(&format!("\n====== {0} -- [{1}] -- {2}\n====== Found {3} degree(s) of separation between [{0}] and [{2}]!", player.name, cxn, player.name, edges_len));
                         }
                         Err(e) => {
                             return Err(e)
@@ -115,6 +140,7 @@ pub mod search {
         }
     }
 
+    // Function that retrieves the first year and team that two teammates played together in
     fn same_team_season(players: &HashMap<i32, Player>, p1_id: i32, p2_id: i32) -> Result<String, Box<dyn Error>> {
         let p1_seasons = players.get(&p1_id).unwrap().get_team();
         let teams_data = parse_data::read_file::read_team_data();
@@ -139,4 +165,14 @@ pub mod search {
 
     }
 
+    // Function that verifies if the vertices are within the bounds of the dataset
+    fn verify_vertices(players: &HashMap<i32, Player>, v1: i32, v2: i32) -> bool{
+        let size: usize = crate::algo::search::get_max_id(&players);
+        if (v1 >= 1 && v1 < size as i32) && (v2 >= 1 && v2 < size as i32) {
+            return true
+        }
+        else {
+            return false
+        }
+    }
 }

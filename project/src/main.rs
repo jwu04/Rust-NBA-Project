@@ -7,10 +7,18 @@ mod algo;
 #[cfg(test)]
 mod test;
 
+// Welcome to this project!
+// This part runs our breadth-first search on the dataset from
+// https://www.kaggle.com/datasets/harisbeslic/nba-player-data-by-game-from-1949-to-2019?select=all_game_scores.csv
+// The algorithm will find the first path that it sees that connects two players (if it can) and display it to the use
+// The only parameters for you to change are when you input two players manually into the program
 fn main() {
+    // Timer for the program
     let start = Instant::now();
+    // Parsing data
     let result = parse_data::read_file::read_player_data();
     match result {
+        // If data can be parsed, try to run BFS on it
         Ok(players) => {
             let vertices = take_input(&players);
             let graph = algo::search::bfs(&players,  vertices.0, vertices.1);
@@ -25,22 +33,28 @@ fn main() {
                 }
             }
         }
+        // Display error otherwise
         Err(e) => {
             eprintln!("{}", e);
         }
     }
 }
 
+// Allows user input
+// Any bad input leads to the program automatically selecting two NBA players at random and trying to connect them
 fn take_input(players: &HashMap<i32, Player>) -> (i32, i32) {
     let mut line = String::new();
     println!("====== Do you want to input two basketball players? (y/n): ");
     std::io::stdin().read_line(&mut line).unwrap();
+    // Using regex to determine if you inputted a 'yes' or 'no'
     let re = RegexSet::new(&[r"^n*?o*$", r"y+?e*s*$"]).unwrap();
     let result = re.matches(&line.strip_suffix("\r\n").unwrap().to_lowercase());
+    // If you said no, randomly selected two NBA players and try to connect them
     if result.matched(0) {
         let rng = algo::search::gen_ids(players);
         return (rng.0, rng.1)
     }
+    // Otherwise, you input two NBA players you want to connect and verifies that these players are real
     else if result.matched(1) {
         let mut player_a = String::new();
         println!("====== Input the first basketball player (from 1949-2019):");
@@ -67,6 +81,7 @@ fn take_input(players: &HashMap<i32, Player>) -> (i32, i32) {
     }
 }
 
+// Helper method to display that you inputted an invalid answer and auto-selects two random players to connect
 fn invalid_input(players: &HashMap<i32, Player>) -> (i32, i32) {
     println!("====== Did not get valid input, generating two random players from 1949-2019...");
     let rng = algo::search::gen_ids(players);
