@@ -69,7 +69,7 @@ pub mod search {
                 }
             }
         }
-        return bfs_graph(component, &players, v_start, v_end);
+        return bfs_graph(component, distance, &players, v_start, v_end);
     }
 
     // Function to get the max_id of a player
@@ -87,7 +87,7 @@ pub mod search {
     }
 
     // Function that creates the 'graph' of our players
-    fn bfs_graph(c: Vec<Option<String>>, players: &HashMap<i32, Player>, v_start: i32, v_end: i32) -> Result<String, Box<dyn Error>> {
+    fn bfs_graph(c: Vec<Option<String>>, d: Vec<Option<u32>>, players: &HashMap<i32, Player>, v_start: i32, v_end: i32) -> Result<String, Box<dyn Error>> {
         let start_name = players.get(&v_start).unwrap().get_name();
         let end_name = players.get(&v_end).unwrap().get_name();
         let edges = &c[v_end as usize];
@@ -109,7 +109,7 @@ pub mod search {
                             Ok(cxn) => {
                                 graph.push_str(&format!("\n====== {} -- [{}] -- {}", player_one.get_name(), cxn, player_two.get_name()));
                                 if index == edges_len-2 {
-                                    graph.push_str(&format!("\n----------------------------------\n====== Found {} degree(s) of separation between [{}] and [{}]!", edges_len-1, player_one.get_name(), player_two.get_name()));
+                                    graph.push_str(&format!("\n----------------------------------\n====== Found {0} degree(s) of separation between [{1}] and [{2}]!\n====== {3} has an average degrees of freedom of {4}!", edges_len-1, player_one.get_name(), player_two.get_name(), start_name, average_distance(&d)));
                                 }
                             }
                             Err(e) => {
@@ -124,7 +124,7 @@ pub mod search {
                     let cxns = same_team_season(&players, player.get_id(), player.get_id());
                     match cxns {
                         Ok(cxn) => {
-                            graph.push_str(&format!("\n====== {0} -- [{1}] -- {2}\n====== Found {3} degree(s) of separation between [{0}] and [{2}]!", player.name, cxn, player.name, edges_len));
+                            graph.push_str(&format!("\n====== {0} -- [{1}] -- {2}\n====== Found {3} degree(s) of separation between [{0}] and [{2}]!\n====== {0} has an average degrees of freedom of {4}!", player.name, cxn, player.name, edges_len, average_distance(&d)));
                         }
                         Err(e) => {
                             return Err(e)
@@ -174,5 +174,18 @@ pub mod search {
         else {
             return false
         }
+    }
+
+    // Function the computes the average distance from the starting vertex to the all players
+    fn average_distance(d: &Vec<Option<u32>>) -> f32 {
+        let mut avg: f32 = 0.0;
+        for num in d {
+            match num {
+                Some(n) => avg += *n as f32,
+                None => avg += 0.0,
+            }
+        }
+        avg /= d.len() as f32;
+        return avg
     }
 }

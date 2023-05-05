@@ -21,7 +21,7 @@ fn main() {
         // If data can be parsed, try to run BFS on it
         Ok(players) => {
             let vertices = take_input(&players);
-            let graph = algo::search::bfs(&players,  vertices.0, vertices.1);
+            let graph = algo::search::bfs(&players, vertices.0, vertices.1);
             match graph {
                 Ok(bfs_graph) => {
                     println!("{}", bfs_graph);
